@@ -2,12 +2,12 @@
 title: "Reproducible Research - Course Project 1"
 author: "Christoph Wagner"
 date: "03/30/2020"
-output: html_document
+output: 
+  html_document:
+    keep_md: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ## Introduction
 This document contains my solution for course project 1 of the Coursera course "Reproducible Research" (Specialization "Data Mining"). The document has been created using R Markdown and the knitr framework.
@@ -20,9 +20,30 @@ At first, we load the libraries necessary for our evaluations and set the workin
 Afterwards we read in the data for this assignment from a .zip file. 
 We set column names as indicated in the assignment and transform the values in column "Date" to the corresponding R data type. 
 
-```{r}
+
+```r
 #Loading libraries
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(ggplot2)
 
 #Setting working directory relatively to markdown file location
@@ -35,6 +56,13 @@ data$Date<-as.Date(data$Date, format="%Y-%m-%d")
 
 str(data)
 ```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ Steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ Date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ Interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
 As visible in the output, the resulting data frame contains 3 columns:
 
 * Steps: Number of steps taken in a 5 minute interval
@@ -45,7 +73,8 @@ As visible in the output, the resulting data frame contains 3 columns:
 In this chapter, we calculated the total number of steps taken per day. Here, we applied the dplyr package to group the data by date.
 Furthermore, we drew a histogram of the total number of steps taken each day (using the ggplot framework).
 
-```{r}
+
+```r
 # Calculate total number of steps per day
 steps_per_day<-data%>%group_by(Date)%>%summarise(Steps=sum(Steps))
 
@@ -57,10 +86,16 @@ g1<-ggplot(steps_per_day, aes(x=Steps))+
 g1
 ```
 
+```
+## Warning: Removed 8 rows containing non-finite values (stat_bin).
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
 In addition, we had to calculate the mean and median of the total number of steps taken per day:
 
-* Mean: `r round(mean(steps_per_day$Steps, na.rm=TRUE), digits=5)`
-* Median: `r round(median(steps_per_day$Steps, na.rm=TRUE), digits=5)`
+* Mean: 1.0766189\times 10^{4}
+* Median: 1.0765\times 10^{4}
 
 In this calculation, the NA values were ignored.
 
@@ -68,7 +103,8 @@ In this calculation, the NA values were ignored.
 In this chapter, we had to visualize the average daily activity pattern. 
 This means, we had to calculate the average steps per 5 minutes interval, averaged over all observed days.
 Afterwards we drew a time series plot to visualize how (in average) the step amount per intervall changes during the day. 
-```{r}
+
+```r
 #Calculate average steps per time interval, ignoring NAs
 steps_per_interval<-data%>%group_by(Interval)%>%summarise(Avg_steps=mean(Steps, na.rm=TRUE))
 
@@ -78,17 +114,21 @@ g2<-ggplot(steps_per_interval, aes(x=Interval, y=Avg_steps))+
   xlab("# of 5-Minute-Interval")+ylab("Average number of steps")+
   ggtitle("Average number of steps by # of 5 minute interval")
 g2
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 #Calculating the time interval in which (in average) the biggest amount of steps occurs
 max_steps_i=which.max(steps_per_interval$Avg_steps)
 max_steps_interv=steps_per_interval[max_steps_i,]$Interval
 ```
 
-The maximum average number of steps (i.e. `r steps_per_interval[max_steps_i, "Avg_steps"]`) occurs in time interval `r max_steps_interv`.
+The maximum average number of steps (i.e. 206.1698113) occurs in time interval 835.
 
 ## Imputing missing values
 Finally, we were asked to impute the missing values in column "steps". 
-All in all, in `r nrow(data%>%filter(is.na(Steps)))` rows there occurred an NA value. 
+All in all, in 2304 rows there occurred an NA value. 
 
 We applied the following imputing strategy:
 In case that in row x column "steps" has value NA, we determine the closest neighboring rows which have a "steps" value unequal to NA. Then we calculate the average "steps" value of these rows and assume it for x.
@@ -96,7 +136,8 @@ In case that in row x column "steps" has value NA, we determine the closest neig
 
 After applying our imputing method on the dataset, we draw again a histogram of the total number of steps taken each day.
 
-```{r}
+
+```r
 #Strategy: Take average of neighboring not-na-values before and after the row with value NA
 impute_na<-function(x){
   new_x=data.frame(x)
@@ -145,6 +186,11 @@ g3<-ggplot(steps_per_day2, aes(x=Steps))+
   xlab("Steps")+ylab("Frequency of steps count")+
   ggtitle("Amount of days with steps count")
 g3
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+```r
 mean_steps2<-round(mean(steps_per_day2$Steps), digits=5)
 md_steps2<-round(median(steps_per_day2$Steps), digits=5)
 ```
@@ -153,8 +199,8 @@ The histogram shows us, that after the imputing procedure, there are far more da
 
 In summary, the new mean/median values are:
 
-* Mean: `r mean_steps2`
-* Median: `r md_steps2`
+* Mean: 9354.22951
+* Median: 1.0395\times 10^{4}
 
 As expected, the values are lower than before the imputation.
 
@@ -162,7 +208,8 @@ As expected, the values are lower than before the imputation.
 Finally, we enriched the dataset with information about the weekday corresponding to the date. 
 Using two time-series plots, we compared the average amount of steps per intervall between weekdays and weekend days.
 
-```{r}
+
+```r
 #Appending an additional column to the frame containing the weekday information
 new_data<-new_data%>%mutate(Day=factor(ifelse(as.POSIXlt(new_data$Date)$wday>5, "Weekend", "Weekday")))
 
@@ -177,6 +224,8 @@ g4<-ggplot(steps_per_interval_wd, aes(x=Interval, y=Avg_steps))+
   ggtitle("Average number of steps by # of 5 minute interval")
 g4
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 The plots clearly show that in weekdays, the number of steps in early morning hours is in average higher. In contrast, in weekend days, the average number of steps in the hours of late evening is higher. 
 
