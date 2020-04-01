@@ -191,15 +191,15 @@ g3
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 ```r
-mean_steps2<-round(mean(steps_per_day2$Steps), digits=5)
-md_steps2<-round(median(steps_per_day2$Steps), digits=5)
+mean_steps2<-round(mean(steps_per_day2$Steps), digits=3)
+md_steps2<-round(median(steps_per_day2$Steps), digits=3)
 ```
 
 The histogram shows us, that after the imputing procedure, there are far more days with a total step count zero or close to zero. The reason for this is that in many cases, the NA values are not don't occur as single value or in small chunks in the middle a day, but hold for the whole day. So the value of the end interval of the previous day and the value of the start interval of the following day are taken for imputing. And due to the night, this value mostly is very small. 
 
 In summary, the new mean/median values are:
 
-* Mean: 9354.22951
+* Mean: 9354.23
 * Median: 1.0395\times 10^{4}
 
 As expected, the values are lower than before the imputation.
